@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jelajah Enam Benua - Game Edukasi IPAS Kelas 6</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js untuk Efek Suara -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            user-select: none;
+        }
+        h1, h2, h3, .font-heading {
+            font-family: 'Fredoka', cursive;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.4);
+        }
+        .continent-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .continent-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(30deg);
+            transition: 0.8s;
+        }
+        .continent-btn:hover::after {
+            left: 100%;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.8);
+        }
+        .pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.98); }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen overflow-x-hidden">
+
+    <!-- Header Navigation -->
+    <header class="w-full px-6 py-4 glass-card sticky top-0 z-50 flex justify-between items-center border-b border-indigo-500/30">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('home-screen')">
+            <div class="bg-gradient-to-tr from-amber-400 to-indigo-500 p-2.5 rounded-2xl shadow-lg">
+                <i class="fa-solid font-bold fa-earth-americas text-2xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-indigo-200 to-emerald-300">
+                    JELAJAH 6 BENUA
+                </h1>
+                <p class="text-xs text-indigo-200">IPAS Kelas 6 SD</p>
+            </div>
+        </div>
+
+        <!-- Score & Controls -->
+        <div class="flex items-center gap-4">
+            <!-- Tampilan Identitas Siswa di Header -->
+            <div id="user-badge" class="hidden flex-col items-end text-right border-r border-indigo-500/30 pr-3">
+                <span id="display-user-name" class="font-bold text-xs sm:text-sm text-amber-300">Siswa</span>
+                <span id="display-user-class" class="text-[10px] text-indigo-200">Kelas 6</span>
+            </div>
+            <div class="flex items-center gap-2 bg-indigo-900/60 px-4 py-2 rounded-xl border border-indigo-400/30 shadow-inner">
+                <i class="fa-solid fa-star text-amber-400 text-lg animate-bounce"></i>
+                <span id="global-score" class="font-bold text-lg text-amber-300">0</span>
+                <span class="text-xs text-indigo-300 hidden sm:inline">Poin</span>
+            </div>
+            <button id="sound-btn" onclick="toggleSound()" class="bg-indigo-800/80 hover:bg-indigo-700 p-2.5 rounded-xl border border-indigo-400/30 transition-all text-indigo-200 hover:text-white">
+                <i class="fa-solid fa-volume-high text-lg" id="sound-icon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow container mx-auto px-4 py-6 flex flex-col justify-center items-center relative z-10 max-w-6xl">
+
+        <!-- SCREEN 1: HOME / BERANDA -->
+        <section id="home-screen" class="w-full flex flex-col items-center text-center space-y-8 py-4">
+            <div class="space-y-3 max-w-2xl">
+                <span class="bg-indigo-500/30 text-indigo-200 text-xs sm:text-sm px-4 py-1.5 rounded-full border border-indigo-400/30 font-semibold tracking-wider">
+                    PETUALANGAN GEOGRAFI INTERAKTIF
+                </span>
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-white leading-tight">
+                    Mari Berkenalan Dengan <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400">Enam Benua</span> Dunia!
+                </h2>
+                <p class="text-indigo-200 text-sm sm:text-base leading-relaxed">
+                    Jelajahi keajaiban, ciri khas, iklim, dan keanekaragaman di Benua Asia, Afrika, Amerika, Eropa, Australia, hingga Antarktika!
+                </p>
+            </div>
+
+            <!-- Form Identitas Siswa (Nama & Kelas) -->
+            <div class="glass-card p-6 rounded-3xl w-full max-w-md border-2 border-amber-400/50 shadow-xl space-y-4">
+                <h3 class="text-lg font-bold text-amber-300 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-id-card"></i> Identitas Petualang
+                </h3>
+                <div class="space-y-3 text-left">
+                    <div>
+                        <label class="block text-xs text-indigo-200 font-semibold mb-1">Nama Lengkap Siswa:</label>
+                        <input type="text" id="input-student-name" placeholder="Masukkan nama kamu..." class="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-indigo-500/40 text-white placeholder-slate-400 text-sm focus:outline-none focus:border-amber-400 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-indigo-200 font-semibold mb-1">Kelas:</label>
+                        <input type="text" id="input-student-class" value="6 SD" placeholder="Contoh: 6A / 6 SD" class="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-indigo-500/40 text-white placeholder-slate-400 text-sm focus:outline-none focus:border-amber-400 transition">
+                    </div>
+                    <button onclick="saveStudentIdentity()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold py-2.5 rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Identitas
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Options -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mt-4">
+                <!-- Mode Eksplorasi -->
+                <div onclick="startExploration()" class="glass-card glass-card-hover p-6 rounded-3xl cursor-pointer flex flex-col items-center text-center border-t-4 border-t-amber-400 group">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-3xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-compass"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">1. Eksplorasi Benua</h3>
+                    <p class="text-xs text-indigo-200">Pelajari peta, materi, flora-fauna, dan fakta unik tiap benua.</p>
+                </div>
+
+                <!-- Mode Kuis / Tantangan -->
+                <div onclick="startQuizMode()" class="glass-card glass-card-hover p-6 rounded-3xl cursor-pointer flex flex-col items-center text-center border-t-4 border-t-emerald-400 group">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-3xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">2. Tantangan Kuis</h3>
+                    <p class="text-xs text-indigo-200">Uji pengetahuanmu dengan menjawab soal-soal seru berwaktu!</p>
+                </div>
+
+                <!-- Mode Mini Game Cocokkan -->
+                <div onclick="startMatchGame()" class="glass-card glass-card-hover p-6 rounded-3xl cursor-pointer flex flex-col items-center text-center border-t-4 border-t-indigo-400 group">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-3xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-puzzle-piece"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">3. Cocokkan Ikon</h3>
+                    <p class="text-xs text-indigo-200">Tarik dan cocokkan simbol/ikon ke benua yang tepat!</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="glass-card px-6 py-4 rounded-2xl flex flex-wrap justify-around items-center w-full max-w-4xl gap-4 text-center mt-6">
+                <div>
+                    <span class="block text-2xl font-bold text-amber-400" id="explored-count">0 / 6</span>
+                    <span class="text-xs text-indigo-300">Benua Dideskripsikan</span>
+                </div>
+                <div class="w-px h-8 bg-indigo-500/30 hidden sm:block"></div>
+                <div>
+                    <span class="block text-2xl font-bold text-emerald-400" id="quiz-high-score">0</span>
+                    <span class="text-xs text-indigo-300">Skor Tertinggi Kuis</span>
+                </div>
+                <div class="w-px h-8 bg-indigo-500/30 hidden sm:block"></div>
+                <div>
+                    <span class="block text-2xl font-bold text-sky-400" id="badge-status">Pemula</span>
+                    <span class="text-xs text-indigo-300">Gelar Penjelajah</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: MODE EKSPLORASI (PETA & DETAIL) -->
+        <section id="explore-screen" class="w-full hidden flex-col space-y-6">
+            <!-- Header Eksplorasi -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 glass-card p-4 rounded-2xl">
+                <button onclick="showScreen('home-screen')" class="bg-indigo-800/60 hover:bg-indigo-700 text-indigo-200 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu
+                </button>
+                <h2 class="text-2xl font-bold text-amber-300 flex items-center gap-2">
+                    <i class="fa-solid fa-map-location-dot"></i> Pilih Benua Untuk Dipelajari
+                </h2>
+                <div class="text-xs text-indigo-300 bg-indigo-900/40 px-3 py-1.5 rounded-lg border border-indigo-500/20">
+                    Klik salah satu benua di bawah
+                </div>
+            </div>
+
+            <!-- Grid Kartu Benua -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6" id="continents-grid">
+                <!-- Javascript akan mengisi grid benua di sini -->
+            </div>
+        </section>
+
+        <!-- MODAL DETAIL BENUA -->
+        <div id="continent-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass-card bg-slate-900/90 border border-indigo-500/40 w-full max-w-3xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+                <!-- Modal Header -->
+                <div id="modal-header-bg" class="p-6 relative flex justify-between items-start bg-gradient-to-r from-indigo-900 to-purple-900">
+                    <div class="flex items-center gap-4">
+                        <span id="modal-icon" class="text-4xl p-3 bg-white/10 rounded-2xl backdrop-blur-sm"></span>
+                        <div>
+                            <h3 id="modal-title" class="text-2xl sm:text-3xl font-extrabold text-white"></h3>
+                            <p id="modal-subtitle" class="text-amber-300 text-xs sm:text-sm font-semibold"></p>
+                        </div>
+                    </div>
+                    <button onclick="closeContinentModal()" class="bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center transition border border-white/20">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body (Scrollable) -->
+                <div class="p-6 overflow-y-auto space-y-6 text-sm text-slate-200 flex-grow">
+                    <!-- Penjelasan Umum -->
+                    <div>
+                        <h4 class="text-base font-bold text-amber-400 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info"></i> Gambaran Umum
+                        </h4>
+                        <p id="modal-description" class="leading-relaxed bg-slate-800/50 p-4 rounded-xl border border-slate-700/50"></p>
+                    </div>
+
+                    <!-- Grid Informasi Unik -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                            <h5 class="font-bold text-emerald-400 mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-sun"></i> Iklim & Cuaca
+                            </h5>
+                            <p id="modal-climate" class="text-xs sm:text-sm leading-relaxed"></p>
+                        </div>
+                        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                            <h5 class="font-bold text-sky-400 mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-paw"></i> Flora & Fauna Khas
+                            </h5>
+                            <p id="modal-fauna" class="text-xs sm:text-sm leading-relaxed"></p>
+                        </div>
+                    </div>
+
+                    <!-- Fakta Unik / Landmark -->
+                    <div class="bg-indigo-950/40 p-4 rounded-xl border border-indigo-800/40">
+                        <h4 class="text-base font-bold text-indigo-300 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-400"></i> Fakta Menarik & Ikonik
+                        </h4>
+                        <ul id="modal-facts" class="list-disc list-inside space-y-1.5 text-xs sm:text-sm text-indigo-100"></ul>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-4 bg-slate-900 border-t border-slate-800 flex justify-between items-center">
+                    <span id="modal-status-badge" class="text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <i class="fa-solid fa-check"></i> Sudah Dipelajari
+                    </span>
+                    <button onclick="closeContinentModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-xl text-sm font-bold transition shadow-lg">
+                        Tutup & Paham
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: TANTANGAN KUIS INTERAKTIF -->
+        <section id="quiz-screen" class="w-full hidden flex-col items-center max-w-3xl space-y-6">
+            <!-- Quiz Header -->
+            <div class="w-full glass-card p-4 rounded-2xl flex justify-between items-center">
+                <button onclick="showScreen('home-screen')" class="text-xs sm:text-sm text-indigo-300 hover:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i> Menu Utama
+                </button>
+                <div class="flex items-center gap-4">
+                    <span class="text-xs sm:text-sm text-indigo-200">Soal <b id="quiz-current-num" class="text-amber-400">1</b> dari <b id="quiz-total-num">10</b></span>
+                </div>
+            </div>
+
+            <!-- Progress & Timer Bar -->
+            <div class="w-full space-y-2">
+                <div class="flex justify-between items-center text-xs text-indigo-300">
+                    <span>Waktu Tersisa:</span>
+                    <span id="timer-text" class="font-bold text-amber-400 text-sm">20s</span>
+                </div>
+                <div class="w-full bg-slate-800/80 rounded-full h-3 overflow-hidden p-0.5 border border-slate-700">
+                    <div id="timer-bar" class="bg-gradient-to-r from-amber-400 to-red-500 h-full rounded-full transition-all duration-1000 w-full"></div>
+                </div>
+            </div>
+
+            <!-- Quiz Card -->
+            <div class="w-full glass-card p-6 sm:p-8 rounded-3xl space-y-6 relative border-t-4 border-t-indigo-400">
+                <!-- Question -->
+                <div class="space-y-2">
+                    <span id="question-category" class="text-xs uppercase font-bold tracking-wider text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
+                        Kategori Benua
+                    </span>
+                    <h3 id="question-text" class="text-lg sm:text-2xl font-bold text-white leading-relaxed">
+                        Memuat Pertanyaan...
+                    </h3>
+                </div>
+
+                <!-- Answer Options -->
+                <div id="quiz-options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- JS inject options here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: HASIL KUIS -->
+        <section id="result-screen" class="w-full hidden flex-col items-center max-w-xl text-center space-y-6">
+            <div class="glass-card p-8 rounded-3xl w-full border-t-4 border-t-amber-400 space-y-6">
+                <div class="w-24 h-24 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-amber-400 text-5xl mx-auto animate-bounce">
+                    <i class="fa-solid fa-trophy" id="result-icon"></i>
+                </div>
+
+                <div>
+                    <h2 class="text-3xl font-extrabold text-white" id="result-title">Luar Biasa!</h2>
+                    <!-- Menampilkan nama & kelas di layar hasil -->
+                    <p class="text-amber-300 font-bold text-base mt-1" id="result-student-info">Siswa Kelas 6</p>
+                    <p class="text-indigo-200 text-xs sm:text-sm mt-0.5" id="result-subtitle">Kamu telah menyelesaikan Tantangan Jelajah 6 Benua!</p>
+                </div>
+
+                <!-- Score Box -->
+                <div class="bg-slate-900/60 p-6 rounded-2xl border border-indigo-500/30 grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-xs text-indigo-300 block">Skor Akhir</span>
+                        <span id="final-score" class="text-3xl font-extrabold text-amber-400">0</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-indigo-300 block">Jawaban Benar</span>
+                        <span id="final-correct" class="text-3xl font-extrabold text-emerald-400">0 / 10</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                    <button onclick="startQuizMode()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Coba Lagi
+                    </button>
+                    <button onclick="showScreen('home-screen')" class="flex-1 bg-indigo-800/80 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition border border-indigo-500/30 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-house"></i> Menu Utama
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: MINI GAME COCOKKAN IKON -->
+        <section id="match-screen" class="w-full hidden flex-col items-center max-w-4xl space-y-6">
+            <div class="w-full glass-card p-4 rounded-2xl flex justify-between items-center">
+                <button onclick="showScreen('home-screen')" class="text-xs sm:text-sm text-indigo-300 hover:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Menu Utama
+                </button>
+                <h3 class="text-lg font-bold text-amber-300">Tarik & Cocokkan Ikon Khas</h3>
+                <span class="text-xs text-indigo-300">Skor: <b id="match-score" class="text-emerald-400">0</b>/6</span>
+            </div>
+
+            <p class="text-xs sm:text-sm text-indigo-200 text-center">
+                Geser (drag) atau klik nama ikon di sebelah kiri, lalu pasangkan ke kotak Benua yang tepat di sebelah kanan!
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                <!-- Source Items (Ikon) -->
+                <div class="glass-card p-4 rounded-2xl space-y-3">
+                    <h4 class="text-sm font-bold text-amber-400 border-b border-indigo-500/30 pb-2">Item / Simbol Khas:</h4>
+                    <div id="match-sources" class="grid grid-cols-1 gap-2">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Target Items (Benua) -->
+                <div class="glass-card p-4 rounded-2xl space-y-3">
+                    <h4 class="text-sm font-bold text-emerald-400 border-b border-indigo-500/30 pb-2">Kotak Benua Tujuan:</h4>
+                    <div id="match-targets" class="grid grid-cols-1 gap-2">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-4 glass-card border-t border-indigo-500/20 text-center text-xs text-indigo-300 mt-auto">
+        <p>© 2026 Media Pembelajaran IPAS Kelas 6 - Bab 3: Berkenalan Dengan Enam Benua</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* ==========================================================================
+           DATA BENUA (Materi Pembelajaran IPAS Kelas 6)
+           ========================================================================== */
+        const continentsData = [
+            {
+                id: 'asia',
+                name: 'Benua Asia',
+                subtitle: 'Benua Terluas & Terpopuler di Dunia',
+                icon: '🌏',
+                color: 'from-amber-500 to-orange-600',
+                border: 'border-amber-400',
+                bgBadge: 'bg-amber-500/20 text-amber-300',
+                description: 'Asia adalah benua terbesar di dunia baik dari segi luas wilayah maupun jumlah penduduk. Indonesia berada di benua Asia (Asia Tenggara).',
+                climate: 'Sangat beragam: dari Tropis (Indonesia), Subtropis (Cina), Gurun panas (Arab), hingga Dingin/Kutub (Siberia).',
+                fauna: 'Komodo, Orangutan, Panda, Harimau Bengal, Gajah Asia.',
+                facts: [
+                    'Memiliki titik tertinggi di bumi: Gunung Everest (Himalaya).',
+                    'Tempat tinggal lebih dari 60% populasi manusia di bumi.',
+                    'Dikelilingi oleh Samudra Pasifik, Hindia, dan Arktik.'
+                ],
+                matchIcon: '🐼 Panda & Gajah',
+                matchId: 'asia'
+            },
+            {
+                id: 'afrika',
+                name: 'Benua Afrika',
+                subtitle: 'Benua Hitam & Rumah Kehidupan Liar',
+                icon: '🌍',
+                color: 'from-yellow-600 to-amber-700',
+                border: 'border-yellow-500',
+                bgBadge: 'bg-yellow-500/20 text-yellow-300',
+                description: 'Benua Afrika terkenal dengan keanekaragaman hayati safari liar, padang pasir terluas, serta sungai terpanjang di dunia.',
+                climate: 'Sebagian besar bertropis panas dan gersang/semi-kering dengan zona gurun yang luas.',
+                fauna: 'Singa, Jerapah, Gajah Afrika, Zebra, Badak, Cheetah.',
+                facts: [
+                    'Memiliki Gurun Sahara (gurun panas terbesar di dunia).',
+                    'Aliran Sungai Nil, sungai terpanjang di dunia.',
+                    'Terkenal dengan Piramida Mesir dan kebudayaan kuno.'
+                ],
+                matchIcon: '🦁 Singa & Gurun Sahara',
+                matchId: 'afrika'
+            },
+            {
+                id: 'amerika',
+                name: 'Benua Amerika',
+                subtitle: 'Benua Merah / Benua Panjang',
+                icon: '🌎',
+                color: 'from-red-600 to-rose-700',
+                border: 'border-red-400',
+                bgBadge: 'bg-red-500/20 text-red-300',
+                description: 'Amerika membentang dari Kutub Utara hingga dekat Kutub Selatan. Terbagi menjadi Amerika Utara, Amerika Tengah, dan Amerika Selatan.',
+                climate: 'Bervariasi lengkap dari iklim Kutub di Utara, Sedang, Tropis (Hutan Amazon), hingga Dingin di Selatan.',
+                fauna: 'Bison, Puma, Jaguar, Alpaka, Burung Kondor, Anaconda.',
+                facts: [
+                    'Rumah bagi Hutan Hujan Amazon (Paru-paru Dunia).',
+                    'Terdapat pegunungan terpanjang: Pegunungan Andes.',
+                    'Ditemukan oleh Christopher Columbus (secara modern).'
+                ],
+                matchIcon: '🌳 Hutan Hujan Amazon',
+                matchId: 'amerika'
+            },
+            {
+                id: 'eropa',
+                name: 'Benua Eropa',
+                subtitle: 'Benua Biru & Pusat Sejarah Modern',
+                icon: '🏰',
+                color: 'from-blue-600 to-indigo-700',
+                border: 'border-blue-400',
+                bgBadge: 'bg-blue-500/20 text-blue-300',
+                description: 'Eropa menyatu secara daratan dengan Asia (Eurasia). Julukan Benua Biru karena mayoritas penduduknya memiliki mata berwarna biru.',
+                climate: 'Beriklim Sedang hingga Dingin. Memiliki 4 musim: Perdana, Panas, Gugur, dan Dingin.',
+                fauna: 'Serigala Abu-abu, Beruang Cokelat Eropa, Rusa Merah, Lynx.',
+                facts: [
+                    'Memiliki negara terkecil di dunia: Vatikan.',
+                    'Pusat perkembangan ilmu pengetahuan dan revolusi industri.',
+                    'Dikelilingi Samudra Atlantik dan Laut Tengah.'
+                ],
+                matchIcon: '🏰 Menara Eiffel & Vatikan',
+                matchId: 'eropa'
+            },
+            {
+                id: 'australia',
+                name: 'Benua Australia',
+                subtitle: 'Benua Hijau & Negara Benua',
+                icon: '🦘',
+                color: 'from-emerald-600 to-green-700',
+                border: 'border-emerald-400',
+                bgBadge: 'bg-emerald-500/20 text-emerald-300',
+                description: 'Australia adalah benua terkecil di dunia dan satu-satunya benua yang hanya terdiri dari satu negara saja.',
+                climate: 'Sebagian besar wilayah tengahnya berupa gurun gersang (Outback), bagian pantai beriklim subtropis dan sedang.',
+                fauna: 'Kangguru, Koala, Platipus, Wombat, Burung Emu.',
+                facts: [
+                    'Terkenal dengan hewan berkantung (Marsupialia).',
+                    'Memiliki terumbu karang terbesar dunia: Great Barrier Reef.',
+                    'Tetangga terdekat benua Asia bagian selatan.'
+                ],
+                matchIcon: '🦘 Kangguru & Koala',
+                matchId: 'australia'
+            },
+            {
+                id: 'antarktika',
+                name: 'Benua Antarktika',
+                subtitle: 'Benua Putih / Benua Es',
+                icon: '🐧',
+                color: 'from-cyan-500 to-blue-400',
+                border: 'border-cyan-300',
+                bgBadge: 'bg-cyan-500/20 text-cyan-200',
+                description: 'Benua terdingin, terkering, dan tertutup es tebal sepanjang tahun di Kutub Selatan bumi. Tidak memiliki penduduk tetap.',
+                climate: 'Iklim Kutub Sangat Ekstrem. Suhu bisa mencapai di bawah -80°C.',
+                fauna: 'Penguin Emperur, Anjing Laut Weddell, Paus Orca, Krill.',
+                facts: [
+                    '98% wilayahnya tertutup es tebal.',
+                    'Hanya ditempati para peneliti dan ilmuwan sementara.',
+                    'Merupakan cadangan air tawar terbesar di dunia.'
+                ],
+                matchIcon: '🐧 Penguin & Es Abadi',
+                matchId: 'antarktika'
+            }
+        ];
+
+        /* ==========================================================================
+           DATA SOAL KUIS (IPAS Kelas 6 - Enam Benua)
+           ========================================================================== */
+        const quizQuestions = [
+            {
+                question: "Benua apakah yang memiliki wilayah paling luas dan jumlah penduduk terbanyak di dunia?",
+                options: ["Benua Afrika", "Benua Asia", "Benua Amerika", "Benua Eropa"],
+                answer: 1,
+                category: "Pengetahuan Umum Benua"
+            },
+            {
+                question: "Hewan Kangguru dan Koala merupakan fauna khas yang berasal dari benua...",
+                options: ["Australia", "Asia", "Antarktika", "Afrika"],
+                answer: 0,
+                category: "Flora & Fauna"
+            },
+            {
+                question: "Hutan Hujan Amazon yang dijuluki sebagai 'Paru-paru Dunia' terletak di benua...",
+                options: ["Eropa", "Afrika", "Amerika", "Asia"],
+                answer: 2,
+                category: "Bentang Alam"
+            },
+            {
+                question: "Benua yang diselimuti oleh lapisan es tebal sepanjang tahun dan tidak memiliki penduduk tetap adalah...",
+                options: ["Benua Eropa", "Benua Asia", "Benua Australia", "Benua Antarktika"],
+                answer: 3,
+                category: "Karakteristik Benua"
+            },
+            {
+                question: "Sungai terpanjang di dunia, yaitu Sungai Nil, berada di benua...",
+                options: ["Afrika", "Amerika", "Asia", "Eropa"],
+                answer: 0,
+                category: "Bentang Alam"
+            },
+            {
+                question: "Negara Indonesia terletak di wilayah benua mana?",
+                options: ["Asia", "Australia", "Amerika", "Eropa"],
+                answer: 0,
+                category: "Geografi Indonesia"
+            },
+            {
+                question: "Puncak tertinggi di dunia (Gunung Everest) berada di pegunungan Himalaya di benua...",
+                options: ["Eropa", "Asia", "Afrika", "Amerika"],
+                answer: 1,
+                category: "Peta & Gunung"
+            },
+            {
+                question: "Benua terkecil di dunia yang sekaligus menjadi satu nama negara adalah...",
+                options: ["Eropa", "Antarktika", "Australia", "Asia"],
+                answer: 2,
+                category: "Pengetahuan Umum"
+            },
+            {
+                question: "Benua yang dijuluki sebagai 'Benua Biru' adalah...",
+                options: ["Benua Amerika", "Benua Afrika", "Benua Eropa", "Benua Asia"],
+                answer: 2,
+                category: "Julukan Benua"
+            },
+            {
+                question: "Gurun panas terbesar di dunia, yaitu Gurun Sahara, terletak di benua...",
+                options: ["Asia", "Afrika", "Australia", "Amerika"],
+                answer: 1,
+                category: "Iklim & Gurun"
+            }
+        ];
+
+        /* ==========================================================================
+           STATE & VARIABLE GLOBAL
+           ========================================================================== */
+        let studentName = "";
+        let studentClass = "6 SD";
+        let score = 0;
+        let exploredContinents = new Set();
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let quizTimer = null;
+        let timeLeft = 20;
+        let soundEnabled = true;
+        let selectedMatchSource = null;
+        let matchedCount = 0;
+
+        // Tone.js Sound Synth
+        let synth;
+
+        /* ==========================================================================
+           IDENTITAS SISWA LOGIC
+           ========================================================================== */
+        function saveStudentIdentity() {
+            playSound('click');
+            const nameInput = document.getElementById('input-student-name').value.trim();
+            const classInput = document.getElementById('input-student-class').value.trim();
+
+            if (nameInput !== "") {
+                studentName = nameInput;
+            } else {
+                studentName = "Petualang Muda";
+            }
+
+            if (classInput !== "") {
+                studentClass = classInput;
+            }
+
+            // Update Badge Header
+            document.getElementById('display-user-name').innerText = studentName;
+            document.getElementById('display-user-class').innerText = `Kelas ${studentClass}`;
+            document.getElementById('user-badge').classList.remove('hidden');
+            document.getElementById('user-badge').classList.add('flex');
+
+            alert(`✅ Identitas berhasil disimpan!\nNama: ${studentName}\nKelas: ${studentClass}`);
+        }
+
+        /* ==========================================================================
+           AUDIO SYSTEM (Tone.js)
+           ========================================================================== */
+        function initAudio() {
+            if (!synth && typeof Tone !== 'undefined') {
+                synth = new Tone.Synth().toDestination();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                
+                if (type === 'click') {
+                    synth.triggerAttackRelease("C5", "8n");
+                } else if (type === 'correct') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("E5", "8n", now);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.1);
+                    synth.triggerAttackRelease("C6", "8n", now + 0.2);
+                } else if (type === 'wrong') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C4", "8n", now);
+                    synth.triggerAttackRelease("F#3", "8n", now + 0.15);
+                } else if (type === 'win') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C5", "8n", now);
+                    synth.triggerAttackRelease("E5", "8n", now + 0.1);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.2);
+                    synth.triggerAttackRelease("C6", "4n", now + 0.3);
+                }
+            } catch(e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-lg';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-lg text-red-400';
+            }
+        }
+
+        /* ==========================================================================
+           NAVIGATION & UTILS
+           ========================================================================== */
+        function showScreen(screenId) {
+            playSound('click');
+            // Hide all screens
+            ['home-screen', 'explore-screen', 'quiz-screen', 'result-screen', 'match-screen'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+
+            // Clear quiz timer if navigating away
+            if (quizTimer) clearInterval(quizTimer);
+
+            // Show selected screen
+            const target = document.getElementById(screenId);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('flex');
+            }
+
+            updateDashboardStats();
+        }
+
+        function addScore(points) {
+            score += points;
+            document.getElementById('global-score').innerText = score;
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('explored-count').innerText = `${exploredContinents.size} / 6`;
+            
+            // Update Title Badge
+            const badgeEl = document.getElementById('badge-status');
+            if (score >= 200) {
+                badgeEl.innerText = "Mahaguru Geografi 🌟";
+                badgeEl.className = "block text-2xl font-bold text-amber-300 animate-pulse";
+            } else if (score >= 100) {
+                badgeEl.innerText = "Penjelajah Ulung 🧭";
+                badgeEl.className = "block text-2xl font-bold text-emerald-400";
+            } else if (score >= 40) {
+                badgeEl.innerText = "Petualang Muda 🎒";
+                badgeEl.className = "block text-2xl font-bold text-sky-400";
+            } else {
+                badgeEl.innerText = "Pemula 🗺️";
+                badgeEl.className = "block text-2xl font-bold text-indigo-300";
+            }
+        }
+
+        /* ==========================================================================
+           MODE 1: EKSPLORASI BENUA
+           ========================================================================== */
+        function startExploration() {
+            renderContinentsGrid();
+            showScreen('explore-screen');
+        }
+
+        function renderContinentsGrid() {
+            const container = document.getElementById('continents-grid');
+            container.innerHTML = '';
+
+            continentsData.forEach(c => {
+                const isExplored = exploredContinents.has(c.id);
+                const card = document.createElement('div');
+                card.className = `glass-card glass-card-hover rounded-3xl p-5 cursor-pointer flex flex-col justify-between border-2 ${c.border} continent-btn relative`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-4xl p-2 bg-slate-900/40 rounded-2xl border border-white/10">${c.icon}</span>
+                        ${isExplored ? 
+                            '<span class="text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full"><i class="fa-solid fa-check"></i> Selesai</span>' : 
+                            '<span class="text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full"><i class="fa-solid fa-eye"></i> Baca</span>'
+                        }
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-extrabold text-white mb-1">${c.name}</h3>
+                        <p class="text-xs text-indigo-200 line-clamp-2">${c.subtitle}</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-indigo-500/20 flex justify-between items-center text-xs text-indigo-300">
+                        <span>Klik untuk detail</span>
+                        <i class="fa-solid fa-chevron-right text-amber-400"></i>
+                    </div>
+                `;
+
+                card.onclick = () => openContinentModal(c);
+                container.appendChild(card);
+            });
+        }
+
+        function openContinentModal(continent) {
+            playSound('click');
+            
+            // Mark as explored
+            if (!exploredContinents.has(continent.id)) {
+                exploredContinents.add(continent.id);
+                addScore(10); // Reward 10 poin per benua dipelajari
+            }
+
+            document.getElementById('modal-icon').innerText = continent.icon;
+            document.getElementById('modal-title').innerText = continent.name;
+            document.getElementById('modal-subtitle').innerText = continent.subtitle;
+            document.getElementById('modal-description').innerText = continent.description;
+            document.getElementById('modal-climate').innerText = continent.climate;
+            document.getElementById('modal-fauna').innerText = continent.fauna;
+
+            const factsUl = document.getElementById('modal-facts');
+            factsUl.innerHTML = '';
+            continent.facts.forEach(fact => {
+                const li = document.createElement('li');
+                li.innerText = fact;
+                factsUl.appendChild(li);
+            });
+
+            document.getElementById('continent-modal').classList.remove('hidden');
+            renderContinentsGrid(); // Refresh badges
+        }
+
+        function closeContinentModal() {
+            playSound('click');
+            document.getElementById('continent-modal').classList.add('hidden');
+        }
+
+        /* ==========================================================================
+           MODE 2: TANTANGAN KUIS INTERAKTIF
+           ========================================================================== */
+        function startQuizMode() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            showScreen('quiz-screen');
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            if (currentQuizIndex >= quizQuestions.length) {
+                finishQuiz();
+                return;
+            }
+
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quiz-current-num').innerText = currentQuizIndex + 1;
+            document.getElementById('quiz-total-num').innerText = quizQuestions.length;
+            document.getElementById('question-category').innerText = q.category;
+            document.getElementById('question-text').innerText = q.question;
+
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-800/70 hover:bg-indigo-600/60 p-4 rounded-2xl border border-indigo-500/30 transition-all font-semibold text-sm sm:text-base text-slate-100 flex items-center justify-between group shadow-md";
+                btn.innerHTML = `
+                    <span class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-900/80 group-hover:bg-amber-400 group-hover:text-slate-900 flex items-center justify-center font-bold text-xs border border-indigo-400/30 transition-colors">
+                            ${String.fromCharCode(65 + idx)}
+                        </span>
+                        <span>${opt}</span>
+                    </span>
+                    <i class="fa-solid fa-circle-check opacity-0 group-hover:opacity-100 text-amber-400 transition-opacity"></i>
+                `;
+                btn.onclick = () => handleAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            startQuizTimer();
+        }
+
+        function startQuizTimer() {
+            if (quizTimer) clearInterval(quizTimer);
+            timeLeft = 20;
+            updateTimerDisplay();
+
+            quizTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(quizTimer);
+                    playSound('wrong');
+                    handleAnswer(-1, null); // Timeout
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerText = document.getElementById('timer-text');
+            const timerBar = document.getElementById('timer-bar');
+            timerText.innerText = `${timeLeft}s`;
+            const percentage = (timeLeft / 20) * 100;
+            timerBar.style.width = `${percentage}%`;
+        }
+
+        function handleAnswer(selectedIndex, btnElement) {
+            clearInterval(quizTimer);
+            const q = quizQuestions[currentQuizIndex];
+            const optionsBtns = document.getElementById('quiz-options-container').children;
+
+            // Disable all buttons
+            for (let btn of optionsBtns) {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed');
+            }
+
+            if (selectedIndex === q.answer) {
+                playSound('correct');
+                if (btnElement) {
+                    btnElement.classList.remove('bg-slate-800/70');
+                    btnElement.classList.add('bg-emerald-600/80', 'border-emerald-400');
+                }
+                quizScore += 10;
+                addScore(10);
+            } else {
+                playSound('wrong');
+                if (btnElement) {
+                    btnElement.classList.remove('bg-slate-800/70');
+                    btnElement.classList.add('bg-red-600/80', 'border-red-400');
+                }
+                // Highlight correct answer
+                if (optionsBtns[q.answer]) {
+                    optionsBtns[q.answer].classList.remove('bg-slate-800/70');
+                    optionsBtns[q.answer].classList.add('bg-emerald-600/60', 'border-emerald-400');
+                }
+            }
+
+            setTimeout(() => {
+                currentQuizIndex++;
+                loadQuizQuestion();
+            }, 1500);
+        }
+
+        function finishQuiz() {
+            playSound('win');
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            document.getElementById('final-score').innerText = quizScore;
+            document.getElementById('final-correct').innerText = `${quizScore / 10} / ${quizQuestions.length}`;
+
+            // Tampilkan identitas siswa pada hasil akhir kuis
+            const infoText = studentName ? `${studentName} (${studentClass})` : "Siswa Kelas 6";
+            document.getElementById('result-student-info').innerText = infoText;
+
+            // High score logic
+            const currentHigh = parseInt(document.getElementById('quiz-high-score').innerText) || 0;
+            if (quizScore > currentHigh) {
+                document.getElementById('quiz-high-score').innerText = quizScore;
+            }
+
+            showScreen('result-screen');
+        }
+
+        /* ==========================================================================
+           MODE 3: MINI GAME COCOKKAN IKON
+           ========================================================================== */
+        function startMatchGame() {
+            selectedMatchSource = null;
+            matchedCount = 0;
+            document.getElementById('match-score').innerText = matchedCount;
+            renderMatchGame();
+            showScreen('match-screen');
+        }
+
+        function renderMatchGame() {
+            const sourcesContainer = document.getElementById('match-sources');
+            const targetsContainer = document.getElementById('match-targets');
+
+            sourcesContainer.innerHTML = '';
+            targetsContainer.innerHTML = '';
+
+            // Shuffle sources
+            const shuffledSources = [...continentsData].sort(() => Math.random() - 0.5);
+            // Shuffle targets
+            const shuffledTargets = [...continentsData].sort(() => Math.random() - 0.5);
+
+            shuffledSources.forEach(c => {
+                const srcEl = document.createElement('div');
+                srcEl.id = `src-${c.id}`;
+                srcEl.className = "bg-slate-800/80 border border-amber-400/30 hover:border-amber-400 p-3.5 rounded-xl cursor-pointer transition flex items-center justify-between font-bold text-sm text-amber-200 select-none shadow-md";
+                srcEl.innerHTML = `
+                    <span>${c.matchIcon}</span>
+                    <i class="fa-solid fa-hand-pointer text-xs text-amber-400/50"></i>
+                `;
+                srcEl.onclick = () => selectMatchSource(c.id, srcEl);
+                sourcesContainer.appendChild(srcEl);
+            });
+
+            shuffledTargets.forEach(c => {
+                const targetEl = document.createElement('div');
+                targetEl.id = `target-${c.id}`;
+                targetEl.className = "bg-slate-900/60 border border-indigo-500/30 p-3.5 rounded-xl flex items-center justify-between font-bold text-sm text-slate-200 transition min-h-[52px]";
+                targetEl.innerHTML = `
+                    <span>${c.name}</span>
+                    <span class="target-slot text-xs text-indigo-400 font-normal border border-dashed border-indigo-400/40 px-3 py-1 rounded-lg">Pilih Pasangan</span>
+                `;
+                targetEl.onclick = () => tryMatchTarget(c.id, targetEl);
+                targetsContainer.appendChild(targetEl);
+            });
+        }
+
+        function selectMatchSource(id, el) {
+            playSound('click');
+            // Remove previous active styles
+            document.querySelectorAll('#match-sources > div').forEach(item => {
+                item.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-500/20');
+            });
+
+            selectedMatchSource = id;
+            el.classList.add('ring-2', 'ring-amber-400', 'bg-amber-500/20');
+        }
+
+        function tryMatchTarget(targetId, targetEl) {
+            if (!selectedMatchSource) {
+                alert("Klik dulu salah satu Ikon Khas di sebelah kiri!");
+                return;
+            }
+
+            if (targetEl.classList.contains('matched')) return;
+
+            if (selectedMatchSource === targetId) {
+                // Correct Match
+                playSound('correct');
+                matchedCount++;
+                addScore(15);
+                document.getElementById('match-score').innerText = matchedCount;
+
+                // Disable source & target
+                const srcEl = document.getElementById(`src-${selectedMatchSource}`);
+                if (srcEl) {
+                    srcEl.className = "bg-emerald-950/40 border border-emerald-500/40 p-3.5 rounded-xl font-bold text-sm text-emerald-400 opacity-50 cursor-not-allowed flex items-center justify-between line-through";
+                    srcEl.onclick = null;
+                }
+
+                targetEl.className = "bg-emerald-900/50 border border-emerald-400 p-3.5 rounded-xl flex items-center justify-between font-bold text-sm text-emerald-300 matched";
+                targetEl.querySelector('.target-slot').outerHTML = `<span class="text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-400/30"><i class="fa-solid fa-check"></i> Cocok!</span>`;
+                targetEl.onclick = null;
+
+                selectedMatchSource = null;
+
+                if (matchedCount === continentsData.length) {
+                    setTimeout(() => {
+                        playSound('win');
+                        confetti({ particleCount: 120, spread: 80 });
+                        alert("🎉 Hebat! Kamu berhasil mencocokkan semua benua dengan benar!");
+                    }, 500);
+                }
+            } else {
+                // Wrong Match
+                playSound('wrong');
+                targetEl.classList.add('animate-bounce');
+                setTimeout(() => targetEl.classList.remove('animate-bounce'), 500);
+            }
+        }
+
+        // Initialize App
+        window.onload = function() {
+            updateDashboardStats();
+        };
+    </script>
+</body>
+</html>
